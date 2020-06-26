@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 [DllImport("user32.dll")] public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, int vk);
 namespace SimpleHotKeys
 {
-    public abstract class hotkey : Form
+    public abstract class hotkey : System.Windows.Forms.Form
     {
         Keys hotKey;
         IntPtr MainWindowHandler;
