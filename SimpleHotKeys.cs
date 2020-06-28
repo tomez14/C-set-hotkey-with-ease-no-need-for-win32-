@@ -4,16 +4,17 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 namespace SimpleHotKeys
 {
-    public abstract class hotkey : System.Windows.Forms.Form
+    
+    public abstract class HotKey : System.Windows.Forms.Form
     {
         [DllImport("user32.dll")] public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, int vk);
         Keys hotKey;
         IntPtr MainWindowHandler;
         bool toggle;
         Thread executer;
-        public hotkey(Keys _hotKey, bool toggle)
+        public HotKey(Keys hotKey, bool toggle)
         {
-            hotKey = _hotKey;
+            this.hotKey = hotKey;
             MainWindowHandler = this.Handle;
             this.toggle = toggle;
             if (toggle)
@@ -23,7 +24,7 @@ namespace SimpleHotKeys
             RegisterHotKey(MainWindowHandler, 1, 0x4000, hotKey.GetHashCode());
         }
         public abstract void whenPressed();
-
+        
         private void toggleWhenPressed()
         {
             while (true) whenPressed();
