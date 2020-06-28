@@ -2,11 +2,11 @@
 using System.Threading;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
-[DllImport("user32.dll")] public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, int vk);
 namespace SimpleHotKeys
 {
     public abstract class hotkey : System.Windows.Forms.Form
     {
+        [DllImport("user32.dll")] public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, int vk);
         Keys hotKey;
         IntPtr MainWindowHandler;
         bool toggle;
