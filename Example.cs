@@ -6,7 +6,7 @@ namespace Example
     public class example : HotKey
     {
         string text;
-        public example(string text, Keys hotkey, bool toggle) : base(hotkey, toggle)//here I made a constructor which inherits from the base constructor aka part 4 of README, it is neccesery. also remeber to make it public for you to be able to access it
+        public example(string text, Keys hotkey, bool toggle) : base(hotkey, toggle)//here I made a constructor which inherits from the base constructor aka step 2 of README in the part of the implementation, it is neccesery to do! Also, remeber to make the constructor public for you to be able to access it
         {
             this.text = text;
         }
