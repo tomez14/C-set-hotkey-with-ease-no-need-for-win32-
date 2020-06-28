@@ -10,9 +10,9 @@ all you need to do is:
 3) Press modify and you are done, just wait for it to make the changes.
 
 After step 2 do the following to use the class in your program(look at example.cs, it will clarify things):
-3) Make a new class which will inherit from hotkey.
-4) Make a constructor that will inherit from base(hotkey,toggle) or in other words, will inherit the base class constructor.
-5) Override the function whenPressed and put in it whatever you want to happen once the hotkey gets pressed.
+1) Make a new class which will inherit from hotkey.
+2) Make a constructor that will inherit from base(hotkey,toggle) or in other words, will inherit the base class constructor.
+3) Override the function whenPressed and put in it whatever you want to happen once the hotkey gets pressed.
 Then, whenever you will make an instance of your class the hotkey will be set with your action.
 * If you want to toggle between calling the function endlessly to not calling it with when the button is pressed, when making the instance give true as the value of toggle.
 * If you only want your function to be executed once every press, when making the instance give false as the value of toggle.
