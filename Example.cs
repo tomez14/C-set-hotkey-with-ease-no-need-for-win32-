@@ -12,7 +12,7 @@ namespace Example
         }
         public override void whenPressed()//you HAVE TO override this function for this class to work, what is inside here will be the code you want to execute once the hotkey was pressed
         {
-            Console.WriteLine(text);
+            //whatever you want to happen once the key was pressed, don't forget about toggle which toggles calling this function or untoggles calling it whenever the key is pressed
         }
     }
 }
