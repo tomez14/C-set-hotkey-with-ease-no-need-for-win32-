@@ -17,5 +17,6 @@ Then, whenever you will make an instance of your class the hotkey will be set wi
 * If you want to toggle between calling the function endlessly to not calling it with when the button is pressed, when making the instance give true as the value of toggle.
 * If you only want your function to be executed once every press, when making the instance give false as the value of toggle.
 
-#SimpleMacro
+About SimpleMacro:
 It's a simple way to make a macro, look at the description for more info about usage
+It was made by my friend.
