@@ -1,0 +1,294 @@
+namespace MacroComponents
+{
+    public class Macro
+    {
+        MacroBasePlayer macroPlayer;
+        HotKey emergency;
+        HotKey toggle;
+ 
+        public Macro(List<MacroComponent> macroComponents) => macroPlayer = new MacroBasePlayer(macroComponents);
+ 
+        public void StartMacro() => macroPlayer.PlayComponent();
+        public void SetEmergency(Keys key)
+        {
+            this.emergency = new HotKey(key);
+            emergency.LinkAction(StopMacro);
+        }
+        public void SetToggle(Keys key)
+        {
+            toggle = new HotKey(key);
+            toggle.LinkAction(ToggleMacro);
+        }
+        void ToggleMacro()
+        {
+            if (macroPlayer.isActive) StopMacro();
+            else macroPlayer.StopComponent();
+        }
+        public void StopMacro() => macroPlayer.StopComponent();
+    }
+ 
+    public abstract class MacroComponent
+    {
+        public MacroFolder linkedFolder;
+        public abstract bool isActive { get; set; }
+ 
+        public abstract void PlayComponent();
+        public abstract void StopComponent();
+    }
+    public abstract class MacroFolder : MacroComponent
+    {
+        public override bool isActive { get; set; }
+        public List<MacroComponent> macroComponents;
+ 
+        public MacroFolder(List<MacroComponent> macroComponents)
+        {
+            foreach (MacroComponent macroComponent in macroComponents) macroComponent.linkedFolder = this;
+            this.macroComponents = macroComponents;
+        }
+ 
+        public abstract override void PlayComponent();
+        public abstract override void StopComponent();
+        public abstract void EndComponentAction();
+    }
+    public class MacroBasePlayer : MacroFolder
+    {
+        public int currentIndex = 0;
+ 
+        public MacroBasePlayer(List<MacroComponent> macroComponents) : base(macroComponents) { }
+ 
+        public override void PlayComponent()
+        {
+            isActive = true;
+            currentIndex = 0;
+            macroComponents[currentIndex].PlayComponent();
+        }
+        public override void StopComponent()
+        {
+            if (currentIndex < macroComponents.Count) macroComponents[currentIndex].StopComponent();
+            isActive = false;
+        }
+        public override void EndComponentAction()
+        {
+            if (isActive == false) return;
+            currentIndex++;
+            if (currentIndex >= macroComponents.Count)
+            {
+                isActive = false;
+                return;
+            }
+            macroComponents[currentIndex].PlayComponent();
+        }
+    }
+    public class MacroPlayer : MacroFolder
+    {
+        MacroFolder linkedFolder;
+        public int currentIndex = 0;
+ 
+        public MacroPlayer(List<MacroComponent> macroComponents, MacroFolder linkedFolder) : base(macroComponents)
+        {
+            this.linkedFolder = linkedFolder;
+        }
+ 
+        public override void PlayComponent()
+        {
+            isActive = true;
+            currentIndex = 0;
+            macroComponents[currentIndex].PlayComponent();
+        }
+        public override void StopComponent()
+        {
+            if (currentIndex < macroComponents.Count) macroComponents[currentIndex].StopComponent();
+            isActive = false;
+        }
+        public override void EndComponentAction()
+        {
+            if (isActive == false) return;
+            currentIndex++;
+            if (currentIndex >= macroComponents.Count)
+            {
+                isActive = false;
+                linkedFolder.EndComponentAction();
+                return;
+            }
+            macroComponents[currentIndex].PlayComponent();
+        }
+    }
+    public class Press : MacroComponent
+    {
+        HotKey hotKey;wait
+        public override bool isActive { get; set; }
+ 
+        public Press(Keys key) => hotKey = new HotKey(key);
+ 
+        public override void PlayComponent()
+        {
+            isActive = true;
+            hotKey.SimulatePress();
+            isActive = false;
+            linkedFolder.EndComponentAction();
+        }
+        public override void StopComponent() => isActive = false;
+    }
+    public class Delay : MacroComponent
+    {
+        int delay;
+        public override bool isActive { get; set; }
+ 
+        public Delay(int delayInMs) => this.delay = delayInMs;
+ 
+        public override void PlayComponent()
+        {
+            isActive = true;
+            System.Threading.Thread.Sleep(delay);
+            isActive = false;
+            linkedFolder.EndComponentAction();
+        }
+        public override void StopComponent() => isActive = false;
+    }
+    public class WaitForPress : MacroComponent
+    {
+        HotKey hotKey;
+        public override bool isActive { get; set; }
+ 
+        public WaitForPress(Keys key) => hotKey = new HotKey(key);
+ 
+        public override void PlayComponent()
+        {
+            isActive = true;
+            hotKey.LinkAction(KeyPressed);
+        }
+        public override void StopComponent() => KeyPressed();
+ 
+        public void KeyPressed()
+        {
+            hotKey.UnlinkAction();
+            isActive = false;
+            linkedFolder.EndComponentAction();
+        }
+    }
+    public class WriteSentence : MacroComponent
+    {
+        string str;
+        public override bool isActive { get; set; }
+ 
+        public WriteSentence(string str) => this.str = str;
+ 
+        public override void PlayComponent()
+        {
+            isActive = true;
+            SendKeys.SendWait(str);
+            isActive = false;
+            linkedFolder.EndComponentAction();
+        }
+ 
+        public override void StopComponent() => isActive = false;
+    }
+    public class RandomComponent : MacroFolder
+    {
+        MacroComponent activeComponent;
+ 
+        public RandomComponent(List<MacroComponent> macroComponents) : base(macroComponents) { }
+ 
+        public override void PlayComponent()
+        {
+            isActive = true;
+            activeComponent = macroComponents[new Random().Next(0, macroComponents.Count)];
+            activeComponent.PlayComponent();
+        }
+        public override void StopComponent()
+        {
+            activeComponent.StopComponent();
+            isActive = false;
+        }
+        public override void EndComponentAction()
+        {
+            isActive = false;
+            linkedFolder.EndComponentAction();
+        }
+    }
+    public class Repeat : MacroFolder
+    {
+        MacroPlayer macroPlayer;
+        int numOfLoops;
+        int numOfLoopsDone;
+ 
+        public Repeat(List<MacroComponent> macroComponents, int _numOfLoops) : base(macroComponents)
+        {
+            macroPlayer = new MacroPlayer(macroComponents, this);
+            this.numOfLoops = _numOfLoops;
+        }
+        
+        public override void PlayComponent()
+        {
+            isActive = true;
+            numOfLoopsDone = 0;
+            if (numOfLoopsDone >= numOfLoops - 1)
+            {
+                linkedFolder.EndComponentAction();
+                return;
+            }
+            macroPlayer.PlayComponent();
+        }
+        public override void StopComponent()
+        {
+            macroPlayer.StopComponent();
+            isActive = false;
+        }
+        public override void EndComponentAction()
+        {
+            if (numOfLoopsDone >= numOfLoops - 1)
+            {
+                linkedFolder.EndComponentAction();
+                return;
+            }
+            numOfLoopsDone++;
+            macroPlayer.PlayComponent();
+        }
+    }
+ 
+    public class HotKey : Form
+    {
+        [DllImport("user32.dll")] public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, int vk);
+        [DllImport("user32.dll")] static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+        public Keys hotKey;
+        IntPtr MainWindowHandler;
+        Action action;
+ 
+        public HotKey(Keys hotKey)
+        {
+            this.hotKey = hotKey;
+            MainWindowHandler = this.Handle;
+        }
+        public HotKey(Keys hotKey, Action action)
+        {
+            this.hotKey = hotKey;
+            MainWindowHandler = this.Handle;
+            LinkAction(action);
+        }
+ 
+        public void LinkAction(Action action)
+        {
+            RegisterHotKey(MainWindowHandler, 1, 0x4000, hotKey.GetHashCode());
+            this.action = action;
+        }
+        public void UnlinkAction()
+        {
+            UnregisterHotKey(Handle, 1);
+            action = null;
+        }
+        void WhenPressed() => action();
+        public void SimulatePress()
+        {
+            if (action != null) UnregisterHotKey(Handle, 1);
+            byte a = 0;
+            SendKeys.SendWait(hotKey.ToString());
+            if (action != null) RegisterHotKey(MainWindowHandler, 1, 0x4000, hotKey.GetHashCode());
+        }
+ 
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x0312) WhenPressed();
+            base.WndProc(ref m);
+        }
+    }
+}
