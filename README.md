@@ -16,3 +16,6 @@ After step 2 do the following to use the class in your program(look at example.c
 Then, whenever you will make an instance of your class the hotkey will be set with your action.
 * If you want to toggle between calling the function endlessly to not calling it with when the button is pressed, when making the instance give true as the value of toggle.
 * If you only want your function to be executed once every press, when making the instance give false as the value of toggle.
+
+#SimpleMacro
+It's a simple way to make a macro, look at the description for more info about usage
